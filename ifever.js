@@ -74,16 +74,6 @@ var startMonitoring = function(id){
         }
         debug('level : ' + level);
       });
-      /*
-      device._peripheral.readHandle('0x15', function(err, level){
-        if (err){
-          debug('ERROR ' );
-          return;
-        }
-        debug('level: ' + level);
-      });
-      */
-    
       device.notifyMeasurement(function(){
         console.log('notifyMeasurement: ');
       });
