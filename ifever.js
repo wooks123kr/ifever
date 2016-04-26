@@ -1,17 +1,20 @@
-var readline = require('readline');
-var debug = require('debug')('iFever');
-var util = require('util');
+var readline = require('readline'),
+debug = require('debug')('iFever'),
+util = require('util'),
+nconf = require('nconf');
 var Monitor = require('./lib/monitor');
-var rl = readline.createInterface({
-  input : process.stdin,
-  output : process.stdout
-  });
 
-var bands = [
-  {address : 'fe65c3487edf'},
-  {address:  'fdefegegfgef'}
-];
+nconf.argv().env();
+nconf.file({file: './config.json'});
 
+/*
+nconf.defaults({
+'targetBand': {
+  'address': 'fe65c3487edf', 
+  'model': 'iFever', 
+  'tag': 'Wooks'}
+});
+*/
 
 var decodeTemperature = function(data){
   debug('data.length '+ data.length);
@@ -23,46 +26,20 @@ var decodeTemperature = function(data){
   return temperature;
 };
 
-var printArrayIncludeIndex = function(array){
-  var fmtString = '';
-  array.forEach(function(ele, idx){
-    fmtString += util.format('%d : %s \n', idx + 1,  ele.address);
-  });
-  return fmtString;
+var onDisconnect = function(){
+   debug('disconnected');
+   process.nextTick(startMonitoring);
 };
 
-var str = printArrayIncludeIndex(bands);
-rl.setPrompt('Select site from the list\n' + str);
-rl.prompt();
-rl.on('line', function(line) {
-  line = line.trim();
-  var num = Number(line);
-  if (isNaN(num)){
-    debug('type is correct, Enter number');
-    rl.prompt();
-    return;
-  }
-  if (num <= 0 || num > bands.length){
-    debug('Invalid Number Enter number');
-    rl.prompt();
-    return;
-  }
-  debug('Thanks for select site: ' + bands[num - 1].address);
-  startMonitoring(bands[num - 1].address);
-  rl.close();
-  // save the result 다시 입력을 받지 않기 위해서 
-});
-
-var startMonitoring = function(id){
+var startMonitoring = function(){
+  var id = nconf.get('targetBand:address');
+  debug('id: ' + id);
   Monitor.discoverById(id, function(device){
     debug('discovered: ' + device);
-    device.on('disconnect', function(){
-      debug('disconnected');
-      this.emit('disconnected');
-    });
-
+    device.on('disconnect', onDisconnect);
     device.on('measurementChange', function(data){
       console.log('temperature: ' + data);
+      // TODO : send sensor data to Thing+ 
     });
     
     device.connectAndSetUp(function(){
@@ -81,8 +58,4 @@ var startMonitoring = function(id){
   });
 };
 
-rl.on('close', function(){
-  debug('close');
-});
-
-
+startMonitoring();
