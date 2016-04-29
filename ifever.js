@@ -5,7 +5,7 @@ nconf = require('nconf');
 var Monitor = require('./lib/monitor');
 
 nconf.argv().env();
-nconf.file({file: './config.json'});
+nconf.file({file: './config.json', format: require('hjson')});
 
 /*
 nconf.defaults({
