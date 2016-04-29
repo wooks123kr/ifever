@@ -3,6 +3,7 @@ debug = require('debug')('iFever'),
 util = require('util'),
 nconf = require('nconf');
 var Monitor = require('./lib/monitor');
+var thingplus = require('./thingplus');
 
 nconf.argv().env();
 nconf.file({file: './config.json', format: require('hjson')});
@@ -34,6 +35,7 @@ var onDisconnect = function(){
 var startMonitoring = function(){
   var id = nconf.get('targetBand:address');
   debug('id: ' + id);
+  thingplus.initialize([id]);
   Monitor.discoverById(id, function(device){
     debug('discovered: ' + device);
     device.on('disconnect', onDisconnect);
