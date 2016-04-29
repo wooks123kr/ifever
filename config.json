@@ -1,4 +1,5 @@
 {
+  # 스캔할 밴드의 Mac 주소 
   "targetBand": {
     "address" : "fe65c3487edf", "model": "iFever", "tag": "Wooks"
   }
