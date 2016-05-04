@@ -1,5 +1,5 @@
 # iFever
-NodeJS Application which monitors [iFever](http://www.fiismart.com/en/ifever.html) baby thermometer.
+NodeJS Application which monitors [iFever](http://www.fiismart.com/en/ifever.html) bluetooth(BLE) baby thermometer.
 It uses ['noble-device'](https://github.com/sandeepmistry/noble-device)
 package.
 
