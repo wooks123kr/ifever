@@ -26,7 +26,9 @@ function setTemperature(addr, temperature){
     return;
   }
   var band = _.find(targetBands, {'addr': addr});
-  band.temperature = temperature;
+  if (band) {
+    band.temperature = temperature;
+  }
 }
 
 // thingplus에서는 {Address}-{Type}-{Sequenct #} 형태로 ID가 구성되어야 한다.
@@ -54,10 +56,14 @@ var SensorService = {
       return result(new Error('cannot found band id = ' + id));
     }
 
+    debug('[SenserService]band: ' + util.inspect(band));
+
     if (band[thingplusDevice.type]){
-    return result(null, {'value': band[thingplusDevice.type], 'status': 'on'});
+      debug('[SensorService] data= %s', util.inspect(band[thingplusDevice.type]));
+    	return result(null, {'value': band[thingplusDevice.type].value, 'status': 'on'});
     }else{
-      return result(new Error(band[thingplusDevice.type]  + ' is not yet recorded'));
+      //return result(new Error(band[thingplusDevice.type]  + ' is not yet recorded'));
+      return result(null, {'value' : 36.5, 'status': 'on'});
     }
   },
   set: function (id, result){
@@ -81,12 +87,12 @@ var discoverDeviceAndSensors = function(result){
     device.sensors.push({
       id : [band.addr, 'temperature', '1'].join('-'),
       type : 'temperature',
-      name : band.addr + '-temperature',
+      name : [band.model, band.addr,'temperature'].join('-'),
     });
     device.sensors.push({
       id : [band.addr, 'batteryGauge', '1'].join('-'),
       type : 'batteryGauge',
-      name : band.addr + '-batteryGauge',
+      name : [band.model, band.addr,'battery'].join('-'),
     });
     deviceAndSensors.push(device);
   });
@@ -100,7 +106,7 @@ var server;
 module.exports = {
   initialize: function(tBands){
     _.forEach(tBands, function(band){
-      targetBands.push({'addr': band});
+      targetBands.push(band);
     });
     server = jsonrpc.createServer(function (client){
       clientConnection = client;

@@ -11,7 +11,7 @@ nconf.file({file: './config.json', format: require('hjson')});
 /*
 nconf.defaults({
 'targetBand': {
-  'address': 'fe65c3487edf', 
+  'addr': 'fe65c3487edf', 
   'model': 'iFever', 
   'tag': 'Wooks'}
 });
@@ -33,15 +33,21 @@ var onDisconnect = function(){
 };
 
 var startMonitoring = function(){
-  var id = nconf.get('targetBand:address');
-  debug('id: ' + id);
-  thingplus.initialize([id]);
-  Monitor.discoverById(id, function(device){
+  var band = nconf.get('targetBand');
+  debug('band: ' + band);
+  thingplus.initialize([band]);
+  Monitor.discoverById(band.addr, function(device){
     debug('discovered: ' + device);
     device.on('disconnect', onDisconnect);
     device.on('measurementChange', function(data){
       console.log('temperature: ' + data);
       // TODO : send sensor data to Thing+ 
+      var temperature = {
+        'value' : data,
+        'ctime' : new Date(),
+        'where' : 0, // 어디에서 측정했는지, 겨드랑이, 입속, 항문, 귀속 
+      };
+      thingplus.setTemperature(band.addr, temperature);   
     });
     
     device.connectAndSetUp(function(){
