@@ -27,10 +27,20 @@ var decodeTemperature = function(data){
   return temperature;
 };
 
+var batteryMonitor = function(){
+  var self = this;
+  this.readBatteryLevel(function(err, level){
+    debug('battery level: ' + level);
+    thingplus.setBatteryLevel(self.id, level);
+  });
+};
+
 var onDisconnect = function(){
    debug('disconnected');
    process.nextTick(startMonitoring);
+   clearInterval(batteryMonitor);
 };
+
 
 var startMonitoring = function(){
   var band = nconf.get('targetBand');
@@ -40,7 +50,7 @@ var startMonitoring = function(){
     debug('discovered: ' + device);
     device.on('disconnect', onDisconnect);
     device.on('measurementChange', function(data){
-      console.log('temperature: ' + data);
+      console.log(new Date() + ': ' + data);
       // TODO : send sensor data to Thing+ 
       var temperature = {
         'value' : data,
@@ -62,6 +72,8 @@ var startMonitoring = function(){
       device.notifyMeasurement(function(){
         console.log('notifyMeasurement: ');
       });
+
+      setInterval(batteryMonitor.bind(device), 5000);
     });
   });
 };

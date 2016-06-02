@@ -13,6 +13,7 @@ function setBatteryLevel(addr, level, ctime){
   if (!level){
     return false;
   }
+  ctime = ctime || new Date(); 
   var band = _.find(targetBands, {'addr': addr});
   band.battery = {'level' : level, 'ctime': ctime};
 }
@@ -90,8 +91,10 @@ var discoverDeviceAndSensors = function(result){
       name : [band.model, band.addr,'temperature'].join('-'),
     });
     device.sensors.push({
-      id : [band.addr, 'batteryGauge', '1'].join('-'),
-      type : 'batteryGauge',
+      //id : [band.addr, 'batteryGauge', '1'].join('-'),
+      //type : 'batteryGauge',
+      id : [band.addr, 'number', '1'].join('-'),
+      type : 'number',
       name : [band.model, band.addr,'battery'].join('-'),
     });
     deviceAndSensors.push(device);
